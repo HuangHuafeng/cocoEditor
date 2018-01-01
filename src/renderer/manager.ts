@@ -8,26 +8,31 @@
  */
 
 import * as assert from 'assert'
+import * as Electron from 'electron'
 import { App } from '../renderer/app'
+import { GameObjectStore } from './GameObjectStore'
+
+export const smSize = 2
 
 export enum PopupType {
   About = 1,
-  NewMatch,
-  AddPlayer,
-  RemovePlayer,
-  EditPlayer,
-  EditMatch,
-  RemoveAllPlayers,
+  CreateBullet,
+  CreateWeapon,
+  CreateEnemyForce,
+  CreateFriendPlane,
+  CreatePlayerPlane,
+  CreateObject,
 }
 
 export class Manager {
   private static instance: Manager
-  private contentToPrint: any
   private openDialogs: PopupType[]
   private app?: App
+  private gameObjectStore: GameObjectStore
 
   private constructor() {
     this.openDialogs = []
+    this.gameObjectStore = new GameObjectStore()
   }
 
   public static getManager(): Manager {
@@ -36,15 +41,6 @@ export class Manager {
     }
 
     return Manager.instance
-  }
-
-  public print(contentToPrint: any) {
-    this.contentToPrint = contentToPrint
-    this.updateAppState()
-  }
-
-  public getPrintContent() {
-    return this.contentToPrint
   }
 
   public getOpenDialogs() {
@@ -69,16 +65,22 @@ export class Manager {
       case PopupType.About:
         return this.closeTopDialog(dialog)
 
-      case PopupType.NewMatch:
+      case PopupType.CreateBullet:
         return this.closeTopDialog(dialog)
 
-      case PopupType.AddPlayer:
+      case PopupType.CreateWeapon:
         return this.closeTopDialog(dialog)
 
-      case PopupType.EditMatch:
+      case PopupType.CreateEnemyForce:
         return this.closeTopDialog(dialog)
 
-      case PopupType.RemoveAllPlayers:
+      case PopupType.CreateFriendPlane:
+        return this.closeTopDialog(dialog)
+
+      case PopupType.CreatePlayerPlane:
+        return this.closeTopDialog(dialog)
+
+      case PopupType.CreateObject:
         return this.closeTopDialog(dialog)
 
       default:
@@ -101,10 +103,8 @@ export class Manager {
   private closeTopDialog(dialog?: PopupType) {
     if (dialog) {
       if (dialog !== this.openDialogs[this.openDialogs.length - 1]) {
-        if (dialog !== PopupType.EditPlayer && this.openDialogs[this.openDialogs.length - 1] === PopupType.AddPlayer) {
-          // we used the edit player when adding new player
-          assert.ok(false, `"${dialog}" is NOT same as last one: "${this.openDialogs[this.openDialogs.length - 1]}"`)
-        }
+        // we used the edit player when adding new player
+        assert.ok(false, `"${dialog}" is NOT same as last one: "${this.openDialogs[this.openDialogs.length - 1]}"`)
       }
     }
     this.openDialogs.pop()
@@ -126,6 +126,71 @@ export class Manager {
   private updateAppState() {
     if (this.app !== undefined) {
       this.app.update()
+    }
+  }
+
+  public createBullet(parameter: any) {
+    this.gameObjectStore.createBullet(parameter)
+  }
+
+  public createWeapon(parameter: any) {
+    this.gameObjectStore.createWeapon(parameter)
+  }
+
+  public createFriendPlane(
+    id: number,
+    name: string,
+    file: string,
+    health: number,
+    speed: number,
+    damage: number,
+    weapon: number,
+    type: string
+  ) {
+    this.gameObjectStore.createFriendPlane(id, name, file, health, speed, damage, weapon, type)
+  }
+
+  public createPlayerPlane(
+    id: number,
+    friendPlane: number,
+    bornTime: number,
+    bornX: number,
+    bornY: number,
+    destinationX: number,
+    destinationY: number
+  ) {
+    this.gameObjectStore.createPlayerPlane(id, friendPlane, bornTime, bornX, bornY, destinationX, destinationY)
+  }
+
+  public createObject(
+    id: number,
+    classId: number,
+    bornTime: number,
+    bornX: number,
+    bornY: number,
+    destinationX: number,
+    destinationY: number
+  ) {
+    this.gameObjectStore.createObject(id, classId, bornTime, bornX, bornY, destinationX, destinationY)
+  }
+
+  public createForce(parameter: any) {
+    this.gameObjectStore.createForce(parameter)
+  }
+
+  public getGameObjectStore() {
+    return this.gameObjectStore
+  }
+
+  public save() {
+    const options = {
+      defaultPath: '',
+      filters: [{ name: 'JSON 文件', extensions: ['json'] }],
+    }
+    /* show a file-open dialog and read the first selected file */
+    var fileName = Electron.remote.dialog.showSaveDialog(Electron.remote.getCurrentWindow(), options)
+    if (fileName) {
+      this.gameObjectStore.save(fileName)
     }
   }
 }

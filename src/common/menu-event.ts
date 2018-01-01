@@ -11,6 +11,12 @@ export type MenuEvent =
   | 'remove-all-players'
   | 'checkForUpdate'
   | 'quitAndInstall'
+  | 'new-bullet-class'
+  | 'new-weapon-class'
+  | 'new-enemy-force-class'
+  | 'new-friend-plane-class'
+  | 'new-player-plane'
+  | 'new-object'
 
 type ClickHandler = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event) => void
 

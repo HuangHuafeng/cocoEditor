@@ -8,6 +8,11 @@ import { debugLog } from '../common/helper-functions'
 import { GameObjects } from './GameObjects'
 import { ObjectDetails } from './ObjectDetails'
 import { GamePreview } from './GamePreview'
+import { CreateBullet } from './CreateBullet'
+import { CreateWeapon } from './CreateWeapon'
+import { CreateForce } from './CreateForce'
+import { CreatePlayerPlane } from './CreatePlayerPlane'
+import { CreateObject } from './CreateObject'
 
 const notImplemented = (name: string) => {
   const options = {
@@ -63,6 +68,27 @@ export class App extends React.Component<IAppProps, IAppState> {
    */
   private onMenuEvent(event: MenuEvent) {
     switch (event) {
+      case 'new-bullet-class':
+        return this.props.manager.showPopup(PopupType.CreateBullet)
+
+      case 'new-weapon-class':
+        return this.props.manager.showPopup(PopupType.CreateWeapon)
+
+      case 'new-enemy-force-class':
+        return this.props.manager.showPopup(PopupType.CreateEnemyForce)
+
+      case 'new-friend-plane-class':
+        return this.props.manager.showPopup(PopupType.CreateFriendPlane)
+
+      case 'new-player-plane':
+        return this.props.manager.showPopup(PopupType.CreatePlayerPlane)
+
+      case 'new-object':
+        return this.props.manager.showPopup(PopupType.CreateObject)
+
+      case 'file-save':
+        return this.props.manager.save()
+
       default:
         return notImplemented(event)
     }
@@ -74,10 +100,125 @@ export class App extends React.Component<IAppProps, IAppState> {
 
   private renderADialog(dialog: PopupType) {
     switch (dialog) {
+      case PopupType.CreateBullet:
+        return this.renderCreateBulletDialog()
+
+      case PopupType.CreateWeapon:
+        return this.renderCreateWeaponDialog()
+
+      case PopupType.CreateEnemyForce:
+        return this.renderCreateEnemyForceDialog()
+
+      case PopupType.CreateFriendPlane:
+        return this.renderCreateFriendPlaneDialog()
+
+      case PopupType.CreatePlayerPlane:
+        return this.renderCreatePlayerPlaneDialog()
+
+      case PopupType.CreateObject:
+        return this.renderCreateEnemyObjectDialog()
+
       default:
         assert.ok(false, `Unknown dialog: ${name}`)
         return
     }
+  }
+
+  private renderCreateBulletDialog() {
+    return (
+      <CreateBullet
+        key="create-bullet"
+        onDismissed={() => {
+          this.onPopupDismissed(PopupType.CreateBullet)
+        }}
+        manager={this.props.manager}
+        bulletToEdit={0}
+        title="新建子弹"
+        typeList={this.props.manager.getGameObjectStore().getBulletTypes()}
+      />
+    )
+  }
+
+  private renderCreateWeaponDialog() {
+    return (
+      <CreateWeapon
+        key="create-weapon"
+        onDismissed={() => {
+          this.onPopupDismissed(PopupType.CreateWeapon)
+        }}
+        manager={this.props.manager}
+        weaponToEdit={0}
+        title="新建武器"
+        typeList={this.props.manager.getGameObjectStore().getWeaponTypes()}
+      />
+    )
+  }
+
+  private renderCreateEnemyForceDialog() {
+    return (
+      <CreateForce
+        key="create-enemy-force"
+        onDismissed={() => {
+          this.onPopupDismissed(PopupType.CreateEnemyForce)
+        }}
+        manager={this.props.manager}
+        forceToEdit={0}
+        title="新建敌人类型"
+        typeList={this.props.manager.getGameObjectStore().getOtherForceTypes()}
+        onOkCallback={(parameter): void => {
+          this.props.manager.createForce(parameter)
+        }}
+      />
+    )
+  }
+
+  private renderCreateFriendPlaneDialog() {
+    return (
+      <CreateForce
+        key="create-friend-plane"
+        onDismissed={() => {
+          this.onPopupDismissed(PopupType.CreateFriendPlane)
+        }}
+        manager={this.props.manager}
+        forceToEdit={0}
+        title="新建盟友类型"
+        typeList={this.props.manager.getGameObjectStore().getPlayerPlaneTypes()}
+        onOkCallback={(parameter): void => {
+          this.props.manager.createForce(parameter)
+        }}
+      />
+    )
+  }
+
+  private renderCreatePlayerPlaneDialog() {
+    return (
+      <CreatePlayerPlane
+        key="create-player-plane"
+        onDismissed={() => {
+          this.onPopupDismissed(PopupType.CreatePlayerPlane)
+        }}
+        manager={this.props.manager}
+        playerPlaneToEdit={0}
+      />
+    )
+  }
+
+  private renderCreateEnemyObjectDialog() {
+    const title = '新建敌人'
+    const fromClassList = this.props.manager.getGameObjectStore().getAllClonableObjects()
+
+    return (
+      <CreateObject
+        key="create-enemy-object"
+        onDismissed={() => {
+          this.onPopupDismissed(PopupType.CreateObject)
+        }}
+        manager={this.props.manager}
+        fromClassList={fromClassList}
+        title={title}
+        objectToEdit={0}
+      />
+    )
   }
 
   public renderDialogs() {
@@ -91,13 +232,16 @@ export class App extends React.Component<IAppProps, IAppState> {
 
   public render() {
     return (
-      <SplitPane split="vertical" defaultSize={300} maxSize={400}>
-        <SplitPane split="horizontal" defaultSize={300} maxSize={500}>
-          <GameObjects manager={this.props.manager} />
-          <ObjectDetails manager={this.props.manager} />
+      <div>
+        <SplitPane split="vertical" defaultSize={300} maxSize={400}>
+          <SplitPane split="horizontal" defaultSize={300} maxSize={500}>
+            <GameObjects manager={this.props.manager} />
+            <ObjectDetails manager={this.props.manager} />
+          </SplitPane>
+          <GamePreview manager={this.props.manager} />
         </SplitPane>
-        <GamePreview manager={this.props.manager} />
-      </SplitPane>
+        {this.renderDialogs()}
+      </div>
     )
   }
 }

@@ -31,6 +31,40 @@ let template: Array<Electron.MenuItemConstructorOptions> = [
     role: 'editMenu',
   },
   {
+    label: '类型',
+    submenu: [
+      {
+        label: '新建子弹类型',
+        click: emit('new-bullet-class'),
+      },
+      {
+        label: '新建武器类型',
+        click: emit('new-weapon-class'),
+      },
+      {
+        label: '新建敌人类型',
+        click: emit('new-enemy-force-class'),
+      },
+      {
+        label: '新建盟友类型',
+        click: emit('new-friend-plane-class'),
+      },
+    ],
+  },
+  {
+    label: '对象',
+    submenu: [
+      {
+        label: '新建对象',
+        click: emit('new-object'),
+      },
+      {
+        label: '新建玩家主机',
+        click: emit('new-player-plane'),
+      },
+    ],
+  },
+  {
     label: '帮助',
     role: 'help',
     submenu: [],
@@ -94,8 +128,6 @@ export function buildDefaultMenu(): Electron.Menu {
         },
       ],
     })
-
-    addUpdateMenuItems(template[0].submenu, 1)
   }
 
   if (process.platform === 'win32') {
@@ -115,30 +147,7 @@ export function buildDefaultMenu(): Electron.Menu {
       label: `关于${name}`,
       click: emit('show-about'),
     })
-
-    addUpdateMenuItems(helpMenu, 0)
   }
 
   return Electron.Menu.buildFromTemplate(template)
-}
-
-function addUpdateMenuItems(items: any, position: any) {
-  if (process.mas) return
-
-  let updateItems = [
-    {
-      label: '检查更新',
-      visible: true,
-      key: 'checkForUpdate',
-      click: emit('checkForUpdate'),
-    },
-    {
-      label: '重启并安装新版本',
-      enabled: false,
-      key: 'quitAndInstall',
-      click: emit('quitAndInstall'),
-    },
-  ]
-
-  items.splice.apply(items, [position, 0].concat(updateItems))
 }
