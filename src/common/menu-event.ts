@@ -17,6 +17,7 @@ export type MenuEvent =
   | 'new-friend-plane-class'
   | 'new-player-plane'
   | 'new-object'
+  | 'new-object-generator-class'
 
 type ClickHandler = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event) => void
 

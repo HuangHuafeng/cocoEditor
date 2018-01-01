@@ -146,7 +146,7 @@ export class CreateBullet extends React.Component<ICreateBulletProps, ICreateBul
             <FormGroup controlId="id">
               <Col componentClass={ControlLabel} sm={smSize}>
                 ID
-              </Col>{' '}
+              </Col>
               <Col sm={12 - smSize}>
                 <FormControl type="text" value={this.state.id} disabled={this.props.bulletToEdit === 0} />
               </Col>

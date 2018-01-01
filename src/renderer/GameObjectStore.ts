@@ -6,6 +6,7 @@ import { PlayerPlane } from './PlayerPlane'
 import { EnemyPlane } from './EnemyPlane'
 import * as fs from 'fs'
 import { SceneObject } from './SceneObject'
+import { EnemyGenerator } from './EnemyGenerator'
 
 const GameObjectActionType = {
   CreateBullet: 'CREATE_BULLET',
@@ -14,6 +15,7 @@ const GameObjectActionType = {
   CreatePlayerPlane: 'CREATE_PLAYER_PLANE',
   CreateObject: 'CREATE_OBJECT',
   CreateForce: 'CREATE_FORCE',
+  CreateObjectGenerator: 'CREATE_OBJECT_FACTORY',
 }
 
 export interface GameObjectAction {
@@ -25,6 +27,7 @@ export class GameObjectStore {
   allObjects: GameObject[]
   allBullets: GameObject[]
   allWeapons: GameObject[]
+  allGenerators: GameObject[]
   allClonableObjects: GameObject[]
   allFriendPlanes: GameObject[]
   playerPlane: PlayerPlane | undefined
@@ -33,6 +36,7 @@ export class GameObjectStore {
     this.allObjects = []
     this.allBullets = []
     this.allWeapons = []
+    this.allGenerators = []
     this.allClonableObjects = []
     this.allFriendPlanes = []
     this.playerPlane = undefined
@@ -125,6 +129,11 @@ export class GameObjectStore {
     return weaponTypes
   }
 
+  public getGeneratorTypes() {
+    const weaponTypes = [{ name: '生产的对象随机从屏幕上方进入，飞到屏幕下方', value: 'EnemyGenerator' }]
+    return weaponTypes
+  }
+
   // all types except the player plane type (which is controlled by user)
   // in other words, this include enemy and friend, non user controll types
   public getOtherForceTypes() {
@@ -169,10 +178,14 @@ export class GameObjectStore {
         break
     }
 
-    console.log(parameter)
     if (force) {
-      this.allClonableObjects.push(force)
+      if (parameter.type === 'FriendPlane') {
+        this.allFriendPlanes.push(force)
+      } else {
+        this.allClonableObjects.push(force)
+      }
       this.allObjects.push(force)
+      console.log(JSON.stringify(this.allObjects))
     }
   }
 
@@ -210,6 +223,25 @@ export class GameObjectStore {
     console.log(JSON.stringify(this.allObjects))
   }
 
+  private doCreateObjectGenerator(parameter: any) {
+    const id = this.generateObjectId(parameter.id)
+    let generator = undefined
+    switch (parameter.type) {
+      case 'EnemyGenerator':
+        generator = new EnemyGenerator(id, parameter.name, parameter.classId, parameter.triggerInterval)
+        break
+
+      default:
+        break
+    }
+
+    if (generator) {
+      this.allGenerators.push(generator)
+      this.allObjects.push(generator)
+      console.log(JSON.stringify(this.allObjects))
+    }
+  }
+
   private doAction(action: GameObjectAction): void {
     switch (action.type) {
       case GameObjectActionType.CreateBullet:
@@ -234,6 +266,10 @@ export class GameObjectStore {
 
       case GameObjectActionType.CreateObject:
         this.doCreateObject(action.parameter)
+        break
+
+      case GameObjectActionType.CreateObjectGenerator:
+        this.doCreateObjectGenerator(action.parameter)
         break
 
       default:
@@ -261,12 +297,20 @@ export class GameObjectStore {
     return this.allObjects
   }
 
+  public getAllGenerators() {
+    return this.allGenerators
+  }
+
   public createBullet(parameter: any) {
     this.doAction({ type: GameObjectActionType.CreateBullet, parameter })
   }
 
   public createWeapon(parameter: any) {
     this.doAction({ type: GameObjectActionType.CreateWeapon, parameter })
+  }
+
+  public createObjectGenerator(parameter: any) {
+    this.doAction({ type: GameObjectActionType.CreateObjectGenerator, parameter })
   }
 
   public createForce(parameter: any) {
@@ -321,26 +365,10 @@ export class GameObjectStore {
     })
   }
 
-  public createObject(
-    id: number,
-    classId: number,
-    bornTime: number,
-    bornX: number,
-    bornY: number,
-    destinationX: number,
-    destinationY: number
-  ) {
+  public createObject(parameter: any) {
     this.doAction({
       type: GameObjectActionType.CreateObject,
-      parameter: {
-        id,
-        classId,
-        bornTime,
-        bornX,
-        bornY,
-        destinationX,
-        destinationY,
-      },
+      parameter,
     })
   }
 

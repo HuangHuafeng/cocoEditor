@@ -2,31 +2,31 @@ import * as React from 'react'
 import { Manager, smSize } from './manager'
 import { Modal, Button, FormGroup, FormControl, ControlLabel, Form, Col } from 'react-bootstrap'
 
-interface ICreateWeaponProps {
+interface ICreateObjectGeneratorProps {
   readonly manager: Manager
-  readonly weaponToEdit: number
+  readonly objectGeneratorToEdit: number
   readonly title: string
   readonly typeList: any[]
   readonly onDismissed: () => void
 }
 
-interface ICreateWeaponState {
+interface ICreateObjectGeneratorState {
   readonly id: string
   readonly name: string
-  readonly bullet: string
+  readonly classId: number
   readonly triggerInterval: string
   readonly type: string
 }
 
-export class CreateWeapon extends React.Component<ICreateWeaponProps, ICreateWeaponState> {
-  constructor(props: ICreateWeaponProps) {
+export class CreateObjectGenerator extends React.Component<ICreateObjectGeneratorProps, ICreateObjectGeneratorState> {
+  constructor(props: ICreateObjectGeneratorProps) {
     super(props)
 
-    if (this.props.weaponToEdit === 0) {
+    if (this.props.objectGeneratorToEdit === 0) {
       this.state = {
         id: '0',
         name: '',
-        bullet: '0',
+        classId: 0,
         triggerInterval: '1000',
         type: '',
       }
@@ -34,7 +34,7 @@ export class CreateWeapon extends React.Component<ICreateWeaponProps, ICreateWea
       this.state = {
         id: 'NOT IMPLEMENTED',
         name: 'NOT IMPLEMENTED',
-        bullet: 'NOT IMPLEMENTED',
+        classId: 0,
         triggerInterval: 'NOT IMPLEMENTED',
         type: 'NOT IMPLEMENTED',
       }
@@ -44,11 +44,11 @@ export class CreateWeapon extends React.Component<ICreateWeaponProps, ICreateWea
   private onOK = () => {
     const id = 0
     const name = this.state.name
-    const bullet = Number(this.state.bullet)
+    const classId = Number(this.state.classId)
     const triggerInterval = Number(this.state.triggerInterval)
     const type = this.state.type
 
-    this.props.manager.createWeapon({ id, name, bullet, triggerInterval, type })
+    this.props.manager.createObjectGenerator({ id, name, classId, triggerInterval, type })
     this.props.onDismissed()
   }
 
@@ -56,8 +56,8 @@ export class CreateWeapon extends React.Component<ICreateWeaponProps, ICreateWea
     this.setState({ name: event.target.value })
   }
 
-  private onBulletChanged = (event: any) => {
-    this.setState({ bullet: event.target.value })
+  private onClassIdChanged = (event: any) => {
+    this.setState({ classId: event.target.value })
   }
 
   private onTriggerIntervalChanged = (event: any) => {
@@ -98,29 +98,29 @@ export class CreateWeapon extends React.Component<ICreateWeaponProps, ICreateWea
     this.setState({ type: event.target.value })
   }
 
-  private buildBulletSelect() {
+  private buildObjectSelect() {
     let options: any[] = []
     options.push(
       <option value={0} key={0}>
-        无
+        请选择
       </option>
     )
-    const allBullets = this.props.manager.getGameObjectStore().getAllBullets()
-    allBullets.forEach((bullet, index) => {
+    const allClonableObjects = this.props.manager.getGameObjectStore().getAllClonableObjects()
+    allClonableObjects.forEach((object, index) => {
       options.push(
-        <option value={bullet.id} key={index + 1}>
-          {bullet.name}
+        <option value={object.id} key={index + 1}>
+          {object.name}
         </option>
       )
     })
 
     return (
-      <FormGroup controlId="bullet">
+      <FormGroup controlId="objects">
         <Col componentClass={ControlLabel} sm={smSize}>
-          子弹
+          生产对象
         </Col>
         <Col sm={12 - smSize}>
-          <FormControl componentClass="select" placeholder="select" defaultValue="0" onChange={this.onBulletChanged}>
+          <FormControl componentClass="select" placeholder="select" defaultValue="0" onChange={this.onClassIdChanged}>
             {options}
           </FormControl>
         </Col>
@@ -132,7 +132,7 @@ export class CreateWeapon extends React.Component<ICreateWeaponProps, ICreateWea
     return (
       <Modal show={true} onHide={this.props.onDismissed} backdrop="static">
         <Modal.Header>
-          <Modal.Title>{this.props.weaponToEdit === 0 ? '新建武器' : '编辑武器'}</Modal.Title>
+          <Modal.Title>{this.props.title}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form horizontal>
@@ -141,7 +141,7 @@ export class CreateWeapon extends React.Component<ICreateWeaponProps, ICreateWea
                 ID
               </Col>
               <Col sm={12 - smSize}>
-                <FormControl type="text" value={this.state.id} disabled={this.props.weaponToEdit === 0} />
+                <FormControl type="text" value={this.state.id} disabled={this.props.objectGeneratorToEdit === 0} />
               </Col>
             </FormGroup>
             <FormGroup controlId="name">
@@ -153,10 +153,10 @@ export class CreateWeapon extends React.Component<ICreateWeaponProps, ICreateWea
               </Col>
             </FormGroup>
             {this.buildTypeSelect()}
-            {this.buildBulletSelect()}
+            {this.buildObjectSelect()}
             <FormGroup controlId="speed">
               <Col componentClass={ControlLabel} sm={smSize}>
-                扳机间隔
+                产生间隔
               </Col>
               <Col sm={12 - smSize}>
                 <FormControl

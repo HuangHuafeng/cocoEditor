@@ -46,6 +46,10 @@ let template: Array<Electron.MenuItemConstructorOptions> = [
         click: emit('new-enemy-force-class'),
       },
       {
+        label: '新建对象生产者类型',
+        click: emit('new-object-generator-class'),
+      },
+      {
         label: '新建盟友类型',
         click: emit('new-friend-plane-class'),
       },

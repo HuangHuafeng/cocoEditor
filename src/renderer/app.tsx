@@ -11,7 +11,7 @@ import { GamePreview } from './GamePreview'
 import { CreateBullet } from './CreateBullet'
 import { CreateWeapon } from './CreateWeapon'
 import { CreateForce } from './CreateForce'
-import { CreatePlayerPlane } from './CreatePlayerPlane'
+import { CreateObjectGenerator } from './CreateObjectGenerator'
 import { CreateObject } from './CreateObject'
 
 const notImplemented = (name: string) => {
@@ -77,6 +77,9 @@ export class App extends React.Component<IAppProps, IAppState> {
       case 'new-enemy-force-class':
         return this.props.manager.showPopup(PopupType.CreateEnemyForce)
 
+      case 'new-object-generator-class':
+        return this.props.manager.showPopup(PopupType.CreateObjectGenerator)
+
       case 'new-friend-plane-class':
         return this.props.manager.showPopup(PopupType.CreateFriendPlane)
 
@@ -108,6 +111,9 @@ export class App extends React.Component<IAppProps, IAppState> {
 
       case PopupType.CreateEnemyForce:
         return this.renderCreateEnemyForceDialog()
+
+      case PopupType.CreateObjectGenerator:
+        return this.renderCreateObjectGeneratorDialog()
 
       case PopupType.CreateFriendPlane:
         return this.renderCreateFriendPlaneDialog()
@@ -154,6 +160,21 @@ export class App extends React.Component<IAppProps, IAppState> {
     )
   }
 
+  private renderCreateObjectGeneratorDialog() {
+    return (
+      <CreateObjectGenerator
+        key="create-object-factory"
+        onDismissed={() => {
+          this.onPopupDismissed(PopupType.CreateObjectGenerator)
+        }}
+        manager={this.props.manager}
+        objectGeneratorToEdit={0}
+        title="新建对象生产者"
+        typeList={this.props.manager.getGameObjectStore().getGeneratorTypes()}
+      />
+    )
+  }
+
   private renderCreateEnemyForceDialog() {
     return (
       <CreateForce
@@ -190,6 +211,7 @@ export class App extends React.Component<IAppProps, IAppState> {
     )
   }
 
+  /*
   private renderCreatePlayerPlaneDialog() {
     return (
       <CreatePlayerPlane
@@ -202,11 +224,36 @@ export class App extends React.Component<IAppProps, IAppState> {
       />
     )
   }
+  */
+
+  private renderCreatePlayerPlaneDialog() {
+    return (
+      <CreateObject
+        key="create-player-plane"
+        onDismissed={() => {
+          this.onPopupDismissed(PopupType.CreatePlayerPlane)
+        }}
+        manager={this.props.manager}
+        fromClassList={this.props.manager.getGameObjectStore().getAllFriendPlanes()}
+        title="新建玩家主机"
+        objectToEdit={0}
+        onOkCallback={parameter => {
+          this.props.manager.createPlayerPlane(parameter)
+        }}
+      />
+    )
+  }
 
   private renderCreateEnemyObjectDialog() {
-    const title = '新建敌人'
-    const fromClassList = this.props.manager.getGameObjectStore().getAllClonableObjects()
-
+    let fromClassList: any[] = []
+    this.props.manager
+      .getGameObjectStore()
+      .getAllClonableObjects()
+      .forEach(v => fromClassList.push(v))
+    this.props.manager
+      .getGameObjectStore()
+      .getAllGenerators()
+      .forEach(v => fromClassList.push(v))
     return (
       <CreateObject
         key="create-enemy-object"
@@ -215,8 +262,11 @@ export class App extends React.Component<IAppProps, IAppState> {
         }}
         manager={this.props.manager}
         fromClassList={fromClassList}
-        title={title}
+        title="新建对象"
         objectToEdit={0}
+        onOkCallback={parameter => {
+          this.props.manager.createObject(parameter)
+        }}
       />
     )
   }

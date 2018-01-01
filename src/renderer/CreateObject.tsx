@@ -7,15 +7,7 @@ import { GameObject } from './GameObject'
 interface ICreateObjectPlaneProps {
   readonly manager: Manager
   readonly fromClassList: GameObject[]
-  readonly onOkCallback?: (
-    id: number,
-    classId: number,
-    bornTime: number,
-    bornX: number,
-    bornY: number,
-    destinationX: number,
-    destinationY: number
-  ) => void
+  readonly onOkCallback: (parameter: any) => void
   readonly title: string
   readonly objectToEdit: number
   readonly onDismissed: () => void
@@ -57,10 +49,8 @@ export class CreateObject extends React.Component<ICreateObjectPlaneProps, ICrea
     const destinationX = Number(this.state.destinationX)
     const destinationY = Number(this.state.destinationY)
 
-    if (this.props.onOkCallback !== undefined) {
-      this.props.onOkCallback(id, classId, bornTime, bornX, bornY, destinationX, destinationY)
-    } else {
-      this.props.manager.createObject(id, classId, bornTime, bornX, bornY, destinationX, destinationY)
+    if (this.props.onOkCallback) {
+      this.props.onOkCallback({ id, classId, bornTime, bornX, bornY, destinationX, destinationY })
     }
     this.props.onDismissed()
   }
@@ -101,7 +91,7 @@ export class CreateObject extends React.Component<ICreateObjectPlaneProps, ICrea
   }
 
   private onClassIdChanged = (event: any) => {
-    this.setState({ classId: event.target.value })
+    this.setState({ classId: Number(event.target.value) })
   }
 
   private buildFriendPlaneSelect() {

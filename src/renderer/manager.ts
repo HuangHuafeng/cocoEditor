@@ -19,6 +19,7 @@ export enum PopupType {
   CreateBullet,
   CreateWeapon,
   CreateEnemyForce,
+  CreateObjectGenerator,
   CreateFriendPlane,
   CreatePlayerPlane,
   CreateObject,
@@ -72,6 +73,9 @@ export class Manager {
         return this.closeTopDialog(dialog)
 
       case PopupType.CreateEnemyForce:
+        return this.closeTopDialog(dialog)
+
+      case PopupType.CreateObjectGenerator:
         return this.closeTopDialog(dialog)
 
       case PopupType.CreateFriendPlane:
@@ -137,6 +141,10 @@ export class Manager {
     this.gameObjectStore.createWeapon(parameter)
   }
 
+  public createObjectGenerator(parameter: any) {
+    this.gameObjectStore.createObjectGenerator(parameter)
+  }
+
   public createFriendPlane(
     id: number,
     name: string,
@@ -150,28 +158,12 @@ export class Manager {
     this.gameObjectStore.createFriendPlane(id, name, file, health, speed, damage, weapon, type)
   }
 
-  public createPlayerPlane(
-    id: number,
-    friendPlane: number,
-    bornTime: number,
-    bornX: number,
-    bornY: number,
-    destinationX: number,
-    destinationY: number
-  ) {
-    this.gameObjectStore.createPlayerPlane(id, friendPlane, bornTime, bornX, bornY, destinationX, destinationY)
+  public createPlayerPlane(parameter: any) {
+    this.gameObjectStore.createObject(parameter)
   }
 
-  public createObject(
-    id: number,
-    classId: number,
-    bornTime: number,
-    bornX: number,
-    bornY: number,
-    destinationX: number,
-    destinationY: number
-  ) {
-    this.gameObjectStore.createObject(id, classId, bornTime, bornX, bornY, destinationX, destinationY)
+  public createObject(parameter: any) {
+    this.gameObjectStore.createObject(parameter)
   }
 
   public createForce(parameter: any) {
