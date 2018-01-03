@@ -7,15 +7,18 @@ import { EnemyPlane } from './EnemyPlane'
 import * as fs from 'fs'
 import { SceneObject } from './SceneObject'
 import { EnemyGenerator } from './EnemyGenerator'
+import { WeaponTripleBullet } from './WeaponTripleBullet'
+import { ScrollingBackground } from './ScrollingBackground'
 
 const GameObjectActionType = {
   CreateBullet: 'CREATE_BULLET',
   CreateWeapon: 'CREATE_WEAPON',
   CreateFriendPlane: 'CREATE_FRIEND_PLANE',
-  CreatePlayerPlane: 'CREATE_PLAYER_PLANE',
   CreateObject: 'CREATE_OBJECT',
-  CreateForce: 'CREATE_FORCE',
-  CreateObjectGenerator: 'CREATE_OBJECT_FACTORY',
+  CreateObjectGenerator: 'CREATE_OBJECT_GENERATOR',
+  CreateBackground: 'CREATE_BACKGROUND',
+  AddPlayerPlane: 'ADD_PLAYER_PLANE',
+  AddSceneObject: 'ADD_SCENE_OBJECT',
 }
 
 export interface GameObjectAction {
@@ -26,6 +29,7 @@ export interface GameObjectAction {
 export class GameObjectStore {
   allObjects: GameObject[]
   allBullets: GameObject[]
+  allBackgrounds: GameObject[]
   allWeapons: GameObject[]
   allGenerators: GameObject[]
   allClonableObjects: GameObject[]
@@ -35,6 +39,7 @@ export class GameObjectStore {
   constructor() {
     this.allObjects = []
     this.allBullets = []
+    this.allBackgrounds = []
     this.allWeapons = []
     this.allGenerators = []
     this.allClonableObjects = []
@@ -89,6 +94,10 @@ export class GameObjectStore {
         weapon = new Weapon(id, parameter.name, parameter.bullet, parameter.triggerInterval)
         break
 
+      case 'WeaponTripleBullet':
+        weapon = new WeaponTripleBullet(id, parameter.name, parameter.bullet, parameter.triggerInterval)
+        break
+
       default:
         break
     }
@@ -106,6 +115,7 @@ export class GameObjectStore {
       id,
       parameter.name,
       parameter.file,
+      parameter.calmPeriod,
       parameter.health,
       parameter.speed,
       parameter.damage,
@@ -121,12 +131,26 @@ export class GameObjectStore {
     return bulletTypes
   }
 
+  public getBackgroundTypes() {
+    const bulletTypes = [{ name: '滚动背景', value: 'ScrollingBackground' }]
+    return bulletTypes
+  }
+
   public getWeaponTypes() {
     const weaponTypes = [
       { name: '单次发射1颗子弹', value: 'Weapon' },
       { name: '单次发射3颗子弹', value: 'WeaponTripleBullet' },
     ]
     return weaponTypes
+  }
+
+  public getObjectLevelTypes() {
+    const objectLevelTypes = [
+      { name: '最下层', value: -1000 },
+      { name: '中间层', value: 0 },
+      { name: '最上层', value: 1000 },
+    ]
+    return objectLevelTypes
   }
 
   public getGeneratorTypes() {
@@ -136,9 +160,9 @@ export class GameObjectStore {
 
   // all types except the player plane type (which is controlled by user)
   // in other words, this include enemy and friend, non user controll types
-  public getOtherForceTypes() {
-    const otherForceTypes = [{ name: '直飞目的地型', value: 'EnemyPlane' }]
-    return otherForceTypes
+  public getOtherObjectTypes() {
+    const otherObjectTypes = [{ name: '直飞目的地型', value: 'EnemyPlane' }]
+    return otherObjectTypes
   }
 
   public getPlayerPlaneTypes() {
@@ -146,7 +170,7 @@ export class GameObjectStore {
     return playerPlaneTypes
   }
 
-  private doCreateForce(parameter: any) {
+  private doCreateObject(parameter: any) {
     const id = this.generateObjectId(parameter.id)
     let force = undefined
     switch (parameter.type) {
@@ -155,6 +179,7 @@ export class GameObjectStore {
           id,
           parameter.name,
           parameter.file,
+          parameter.calmPeriod,
           parameter.health,
           parameter.speed,
           parameter.damage,
@@ -167,6 +192,7 @@ export class GameObjectStore {
           id,
           parameter.name,
           parameter.file,
+          parameter.calmPeriod,
           parameter.health,
           parameter.speed,
           parameter.damage,
@@ -189,38 +215,36 @@ export class GameObjectStore {
     }
   }
 
-  private doCreatePlayerPlane(parameter: any) {
-    if (this.playerPlane === undefined) {
-      const id = this.generateObjectId(parameter.id)
-      const playerPlane = new PlayerPlane(
-        id,
-        parameter.friendPlane,
-        parameter.bornTime,
-        parameter.bornX,
-        parameter.bornY,
-        parameter.destinationX,
-        parameter.destinationY
-      )
-      this.allObjects.push(playerPlane)
+  private doAddSceneObject(parameter: any) {
+    parameter.id = this.generateObjectId(parameter.id)
+    let newObject = undefined
+    switch (parameter.type) {
+      case 'PlayerPlane':
+        if (this.playerPlane === undefined) {
+          newObject = new PlayerPlane(parameter)
+          this.playerPlane = newObject
+        } else {
+          // do nothing
+          console.log('player plane is already created!')
+        }
+        break
+
+      case 'SceneObject':
+        newObject = new SceneObject(parameter)
+        break
+
+      default:
+        break
+    }
+    if (newObject) {
+      this.allObjects.push(newObject)
       console.log(JSON.stringify(this.allObjects))
-    } else {
-      console.log('player plane is already created!')
     }
   }
 
-  private doCreateObject(parameter: any) {
-    const id = this.generateObjectId(parameter.id)
-    const sceneObject = new SceneObject(
-      id,
-      parameter.classId,
-      parameter.bornTime,
-      parameter.bornX,
-      parameter.bornY,
-      parameter.destinationX,
-      parameter.destinationY
-    )
-    this.allObjects.push(sceneObject)
-    console.log(JSON.stringify(this.allObjects))
+  private doAddPlayerPlane(parameter: any) {
+    console.log(parameter)
+    return this.doAddSceneObject(parameter)
   }
 
   private doCreateObjectGenerator(parameter: any) {
@@ -242,6 +266,24 @@ export class GameObjectStore {
     }
   }
 
+  private doCreateBackground(parameter: any) {
+    parameter.id = this.generateObjectId(parameter.id)
+    let background = undefined
+    switch (parameter.type) {
+      case 'ScrollingBackground':
+        background = new ScrollingBackground(parameter)
+        break
+
+      default:
+        break
+    }
+    if (background) {
+      this.allBackgrounds.push(background)
+      this.allObjects.push(background)
+    }
+    console.log(JSON.stringify(this.allObjects))
+  }
+
   private doAction(action: GameObjectAction): void {
     switch (action.type) {
       case GameObjectActionType.CreateBullet:
@@ -252,24 +294,28 @@ export class GameObjectStore {
         this.doCreateWeapon(action.parameter)
         break
 
-      case GameObjectActionType.CreateForce:
-        this.doCreateForce(action.parameter)
+      case GameObjectActionType.CreateObject:
+        this.doCreateObject(action.parameter)
         break
 
       case GameObjectActionType.CreateFriendPlane:
         this.doCreateFriendPlane(action.parameter)
         break
 
-      case GameObjectActionType.CreatePlayerPlane:
-        this.doCreatePlayerPlane(action.parameter)
-        break
-
-      case GameObjectActionType.CreateObject:
-        this.doCreateObject(action.parameter)
+      case GameObjectActionType.CreateBackground:
+        this.doCreateBackground(action.parameter)
         break
 
       case GameObjectActionType.CreateObjectGenerator:
         this.doCreateObjectGenerator(action.parameter)
+        break
+
+      case GameObjectActionType.AddSceneObject:
+        this.doAddSceneObject(action.parameter)
+        break
+
+      case GameObjectActionType.AddPlayerPlane:
+        this.doAddPlayerPlane(action.parameter)
         break
 
       default:
@@ -301,6 +347,10 @@ export class GameObjectStore {
     return this.allGenerators
   }
 
+  public getAllBackgrounds() {
+    return this.allBackgrounds
+  }
+
   public createBullet(parameter: any) {
     this.doAction({ type: GameObjectActionType.CreateBullet, parameter })
   }
@@ -313,61 +363,29 @@ export class GameObjectStore {
     this.doAction({ type: GameObjectActionType.CreateObjectGenerator, parameter })
   }
 
-  public createForce(parameter: any) {
-    this.doAction({ type: GameObjectActionType.CreateForce, parameter })
-  }
-
-  public createFriendPlane(
-    id: number,
-    name: string,
-    file: string,
-    health: number,
-    speed: number,
-    damage: number,
-    weapon: number,
-    type: string
-  ) {
-    this.doAction({
-      type: GameObjectActionType.CreateFriendPlane,
-      parameter: {
-        id,
-        name,
-        file,
-        health,
-        speed,
-        damage,
-        weapon,
-        type,
-      },
-    })
-  }
-
-  public createPlayerPlane(
-    id: number,
-    friendPlane: number,
-    bornTime: number,
-    bornX: number,
-    bornY: number,
-    destinationX: number,
-    destinationY: number
-  ) {
-    this.doAction({
-      type: GameObjectActionType.CreatePlayerPlane,
-      parameter: {
-        id,
-        friendPlane,
-        bornTime,
-        bornX,
-        bornY,
-        destinationX,
-        destinationY,
-      },
-    })
-  }
-
   public createObject(parameter: any) {
+    this.doAction({ type: GameObjectActionType.CreateObject, parameter })
+  }
+
+  public addPlayerPlane(parameter: any) {
+    parameter.type = 'PlayerPlane'
     this.doAction({
-      type: GameObjectActionType.CreateObject,
+      type: GameObjectActionType.AddPlayerPlane,
+      parameter,
+    })
+  }
+
+  public addSceneObject(parameter: any) {
+    parameter.type = 'SceneObject'
+    this.doAction({
+      type: GameObjectActionType.AddSceneObject,
+      parameter,
+    })
+  }
+
+  public createBackground(parameter: any) {
+    this.doAction({
+      type: GameObjectActionType.CreateBackground,
       parameter,
     })
   }

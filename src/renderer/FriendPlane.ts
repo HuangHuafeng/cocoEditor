@@ -1,8 +1,17 @@
-import { Force } from './Force'
+import { Object } from './Object'
 
-export class FriendPlane extends Force {
-  constructor(id: number, name: string, file: string, health: number, speed: number, damage: number, weapon: number) {
-    super(id, name, file, health, speed, damage, weapon)
+export class FriendPlane extends Object {
+  constructor(
+    id: number,
+    name: string,
+    file: string,
+    calmPeriod: number,
+    health: number,
+    speed: number,
+    damage: number,
+    weapon: number
+  ) {
+    super(id, name, file, calmPeriod, health, speed, damage, weapon)
 
     this.type = 'FriendPlane'
   }

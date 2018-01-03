@@ -2,121 +2,174 @@ import * as React from 'react'
 import { Manager, smSize } from './manager'
 import { Form, Modal, Button, FormGroup, FormControl, ControlLabel, Col } from 'react-bootstrap'
 import { toZeorOrPositiveIntegerString } from '../common/helper-functions'
-import { GameObject } from './GameObject'
 
-interface ICreateObjectPlaneProps {
+interface ICreateObjectProps {
   readonly manager: Manager
-  readonly fromClassList: GameObject[]
-  readonly onOkCallback: (parameter: any) => void
+  readonly forceToEdit: number
+  readonly typeList: any[]
   readonly title: string
-  readonly objectToEdit: number
+  readonly onOkCallback?: (parameter: any) => void
   readonly onDismissed: () => void
 }
 
-interface ICreateObjectPlaneState {
+interface ICreateObjectState {
   readonly id: string
-  readonly classId: number
-  readonly bornTime: string
-  readonly bornX: string
-  readonly bornY: string
-  readonly destinationX: string
-  readonly destinationY: string
+  readonly name: string
+  readonly file: string
+  readonly calmPeriod: string
+  readonly health: string
+  readonly speed: string
+  readonly damage: string
+  readonly weapon: string
+  readonly type: string
 }
 
-export class CreateObject extends React.Component<ICreateObjectPlaneProps, ICreateObjectPlaneState> {
-  constructor(props: ICreateObjectPlaneProps) {
+export class CreateObject extends React.Component<ICreateObjectProps, ICreateObjectState> {
+  constructor(props: ICreateObjectProps) {
     super(props)
 
-    if (this.props.objectToEdit === 0) {
+    if (this.props.forceToEdit === 0) {
       this.state = {
         id: '0',
-        classId: 0,
-        bornTime: '0',
-        bornX: '0',
-        bornY: '0',
-        destinationX: '0',
-        destinationY: '0',
+        name: '',
+        file: '',
+        calmPeriod: '',
+        health: '',
+        speed: '',
+        damage: '',
+        weapon: '0',
+        type: '0',
+      }
+    } else {
+      this.state = {
+        id: 'NOT IMPLEMENTED',
+        name: 'NOT IMPLEMENTED',
+        file: '',
+        calmPeriod: '',
+        health: 'NOT IMPLEMENTED',
+        speed: 'NOT IMPLEMENTED',
+        damage: 'NOT IMPLEMENTED',
+        weapon: 'NOT IMPLEMENTED',
+        type: 'NOT IMPLEMENTED',
       }
     }
   }
 
   private onOK = () => {
     const id = 0
-    const classId = this.state.classId
-    const bornTime = Number(this.state.bornTime)
-    const bornX = Number(this.state.bornX)
-    const bornY = Number(this.state.bornY)
-    const destinationX = Number(this.state.destinationX)
-    const destinationY = Number(this.state.destinationY)
+    const name = this.state.name
+    const tempArray = this.state.file.split('\\')
+    const file = tempArray[tempArray.length - 1]
+    const calmPeriod = Number(this.state.calmPeriod)
+    const health = Number(this.state.health)
+    const speed = Number(this.state.speed)
+    const damage = Number(this.state.damage)
+    const weapon = Number(this.state.weapon)
+    const type = this.state.type
 
     if (this.props.onOkCallback) {
-      this.props.onOkCallback({ id, classId, bornTime, bornX, bornY, destinationX, destinationY })
+      this.props.onOkCallback({ id, name, file, calmPeriod, health, speed, damage, weapon, type })
     }
     this.props.onDismissed()
   }
 
-  private onBornTimeChanged = (event: any) => {
+  private onNameChanged = (event: any) => {
+    this.setState({ name: event.target.value })
+  }
+
+  private onFileChanged = (event: any) => {
+    this.setState({ file: event.target.value })
+  }
+
+  private onTypeChanged = (event: any) => {
+    this.setState({ type: event.target.value })
+  }
+
+  private onWeaponChanged = (event: any) => {
+    this.setState({ weapon: event.target.value })
+  }
+
+  private onCalmPeriodChanged = (event: any) => {
     const numberInString = toZeorOrPositiveIntegerString(event.target.value)
     if (numberInString !== undefined) {
-      this.setState({ bornTime: Number(numberInString) !== 0 ? numberInString : '' })
+      this.setState({ calmPeriod: Number(numberInString) !== 0 ? numberInString : '' })
     }
   }
 
-  private onBornXChanged = (event: any) => {
+  private onSpeedChanged = (event: any) => {
     const numberInString = toZeorOrPositiveIntegerString(event.target.value)
     if (numberInString !== undefined) {
-      this.setState({ bornX: Number(numberInString) !== 0 ? numberInString : '' })
+      this.setState({ speed: Number(numberInString) !== 0 ? numberInString : '' })
     }
   }
 
-  private onBornYChanged = (event: any) => {
+  private onHealthChanged = (event: any) => {
     const numberInString = toZeorOrPositiveIntegerString(event.target.value)
     if (numberInString !== undefined) {
-      this.setState({ bornY: Number(numberInString) !== 0 ? numberInString : '' })
+      this.setState({ health: Number(numberInString) !== 0 ? numberInString : '' })
     }
   }
 
-  private onDestinationXChanged = (event: any) => {
+  private onDamageChanged = (event: any) => {
     const numberInString = toZeorOrPositiveIntegerString(event.target.value)
     if (numberInString !== undefined) {
-      this.setState({ destinationX: Number(numberInString) !== 0 ? numberInString : '' })
+      this.setState({ damage: Number(numberInString) !== 0 ? numberInString : '' })
     }
   }
 
-  private onDestinationYChanged = (event: any) => {
-    const numberInString = toZeorOrPositiveIntegerString(event.target.value)
-    if (numberInString !== undefined) {
-      this.setState({ destinationY: Number(numberInString) !== 0 ? numberInString : '' })
-    }
-  }
-
-  private onClassIdChanged = (event: any) => {
-    this.setState({ classId: Number(event.target.value) })
-  }
-
-  private buildFriendPlaneSelect() {
+  private buildTypeSelect() {
     let options: any[] = []
     options.push(
-      <option value={0} key={0}>
+      <option value="0" key={0}>
         请选择
       </option>
     )
 
-    this.props.fromClassList.forEach((classObject, index) => {
+    this.props.typeList.forEach((type, index) => {
       options.push(
-        <option value={classObject.id} key={index + 1}>
-          {classObject.name}
+        <option value={type.value} key={index + 1}>
+          {type.name}
         </option>
       )
     })
 
     return (
-      <FormGroup controlId="bullet">
+      <FormGroup controlId="type">
         <Col componentClass={ControlLabel} sm={smSize}>
-          种类
+          机型
         </Col>
         <Col sm={12 - smSize}>
-          <FormControl componentClass="select" placeholder="select" defaultValue="0" onChange={this.onClassIdChanged}>
+          <FormControl componentClass="select" defaultValue="0" onChange={this.onTypeChanged}>
+            {options}
+          </FormControl>
+        </Col>
+      </FormGroup>
+    )
+  }
+
+  private buildWeaponSelect() {
+    let options: any[] = []
+    options.push(
+      <option value="0" key={0}>
+        请选择
+      </option>
+    )
+    const allWeapons = this.props.manager.getGameObjectStore().getAllWeapons()
+    allWeapons.forEach((weapon, index) => {
+      options.push(
+        <option value={weapon.id} key={index + 1}>
+          {weapon.name}
+        </option>
+      )
+    })
+
+    return (
+      <FormGroup controlId="weapon">
+        <Col componentClass={ControlLabel} sm={smSize}>
+          武器
+        </Col>
+        <Col sm={12 - smSize}>
+          <FormControl componentClass="select" defaultValue="0" onChange={this.onWeaponChanged}>
             {options}
           </FormControl>
         </Col>
@@ -140,41 +193,54 @@ export class CreateObject extends React.Component<ICreateObjectPlaneProps, ICrea
                 <FormControl type="text" value={this.state.id} disabled={true} />
               </Col>
             </FormGroup>
-            {this.buildFriendPlaneSelect()}
-            <FormGroup controlId="speed">
+            <FormGroup controlId="name">
               <Col componentClass={ControlLabel} sm={smSize}>
-                出生时间
+                名称
               </Col>
               <Col sm={12 - smSize}>
-                <FormControl type="text" value={this.state.bornTime} onChange={this.onBornTimeChanged} />
+                <FormControl type="text" value={this.state.name} onChange={this.onNameChanged} />
               </Col>
             </FormGroup>
-            <FormGroup controlId="born-point">
+            <FormGroup controlId={'file'}>
               <Col componentClass={ControlLabel} sm={smSize}>
-                出生点X
+                图片
               </Col>
-              <Col sm={6 - smSize}>
-                <FormControl type="text" value={this.state.bornX} onChange={this.onBornXChanged} />
-              </Col>
-              <Col componentClass={ControlLabel} sm={smSize}>
-                出生点Y
-              </Col>
-              <Col sm={6 - smSize}>
-                <FormControl type="text" value={this.state.bornY} onChange={this.onBornYChanged} />
+              <Col sm={12 - smSize}>
+                <FormControl type="file" value={this.state.file} onChange={this.onFileChanged} />
               </Col>
             </FormGroup>
-            <FormGroup controlId="destination-point">
+            {this.buildTypeSelect()}
+            {this.buildWeaponSelect()}
+            <FormGroup controlId="calm-period">
               <Col componentClass={ControlLabel} sm={smSize}>
-                目的地X
+                开火延时
               </Col>
-              <Col sm={6 - smSize}>
-                <FormControl type="text" value={this.state.destinationX} onChange={this.onDestinationXChanged} />
+              <Col sm={12 - smSize}>
+                <FormControl type="text" value={this.state.calmPeriod} onChange={this.onCalmPeriodChanged} />
               </Col>
+            </FormGroup>
+            <FormGroup controlId="health">
               <Col componentClass={ControlLabel} sm={smSize}>
-                目的地Y
+                生命值
               </Col>
-              <Col sm={6 - smSize}>
-                <FormControl type="text" value={this.state.destinationY} onChange={this.onDestinationYChanged} />
+              <Col sm={12 - smSize}>
+                <FormControl type="text" value={this.state.health} onChange={this.onHealthChanged} />
+              </Col>
+            </FormGroup>
+            <FormGroup controlId="speed">
+              <Col componentClass={ControlLabel} sm={smSize}>
+                速度
+              </Col>
+              <Col sm={12 - smSize}>
+                <FormControl type="text" value={this.state.speed} onChange={this.onSpeedChanged} />
+              </Col>
+            </FormGroup>
+            <FormGroup controlId="damage">
+              <Col componentClass={ControlLabel} sm={smSize}>
+                伤害
+              </Col>
+              <Col sm={12 - smSize}>
+                <FormControl type="text" value={this.state.damage} onChange={this.onDamageChanged} />
               </Col>
             </FormGroup>
           </Form>

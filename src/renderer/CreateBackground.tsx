@@ -1,41 +1,45 @@
 import * as React from 'react'
 import { Manager, smSize } from './manager'
 import { Modal, Button, FormGroup, FormControl, ControlLabel, Form, Col } from 'react-bootstrap'
+import { toZeorOrPositiveIntegerString } from '../common/helper-functions'
 
-interface ICreateWeaponProps {
+interface ICreateBackgroundProps {
   readonly manager: Manager
-  readonly weaponToEdit: number
-  readonly title: string
+  readonly backgroundToEdit: number
   readonly typeList: any[]
+  readonly title: string
   readonly onDismissed: () => void
 }
 
-interface ICreateWeaponState {
+interface ICreateBackgroundState {
   readonly id: string
   readonly name: string
-  readonly bullet: string
-  readonly triggerInterval: string
+  readonly file1: string
+  readonly file2: string
+  readonly speed: string
   readonly type: string
 }
 
-export class CreateWeapon extends React.Component<ICreateWeaponProps, ICreateWeaponState> {
-  constructor(props: ICreateWeaponProps) {
+export class CreateBackground extends React.Component<ICreateBackgroundProps, ICreateBackgroundState> {
+  constructor(props: ICreateBackgroundProps) {
     super(props)
 
-    if (this.props.weaponToEdit === 0) {
+    if (this.props.backgroundToEdit === 0) {
       this.state = {
         id: '0',
         name: '',
-        bullet: '0',
-        triggerInterval: '1000',
+        file1: '',
+        file2: '',
+        speed: '',
         type: '',
       }
     } else {
       this.state = {
         id: 'NOT IMPLEMENTED',
         name: 'NOT IMPLEMENTED',
-        bullet: 'NOT IMPLEMENTED',
-        triggerInterval: 'NOT IMPLEMENTED',
+        file1: '',
+        file2: '',
+        speed: 'NOT IMPLEMENTED',
         type: 'NOT IMPLEMENTED',
       }
     }
@@ -44,11 +48,14 @@ export class CreateWeapon extends React.Component<ICreateWeaponProps, ICreateWea
   private onOK = () => {
     const id = 0
     const name = this.state.name
-    const bullet = Number(this.state.bullet)
-    const triggerInterval = Number(this.state.triggerInterval)
+    let tempArray = this.state.file1.split('\\')
+    const file1 = tempArray[tempArray.length - 1]
+    tempArray = this.state.file2.split('\\')
+    const file2 = tempArray[tempArray.length - 1]
+    const speed = Number(this.state.speed)
     const type = this.state.type
 
-    this.props.manager.createWeapon({ id, name, bullet, triggerInterval, type })
+    this.props.manager.createBackground({ id, name, file1, file2, speed, type })
     this.props.onDismissed()
   }
 
@@ -56,12 +63,19 @@ export class CreateWeapon extends React.Component<ICreateWeaponProps, ICreateWea
     this.setState({ name: event.target.value })
   }
 
-  private onBulletChanged = (event: any) => {
-    this.setState({ bullet: event.target.value })
+  private onFile1Changed = (event: any) => {
+    this.setState({ file1: event.target.value })
   }
 
-  private onTriggerIntervalChanged = (event: any) => {
-    this.setState({ triggerInterval: event.target.value })
+  private onFile2Changed = (event: any) => {
+    this.setState({ file2: event.target.value })
+  }
+
+  private onSpeedChanged = (event: any) => {
+    const numberInString = toZeorOrPositiveIntegerString(event.target.value)
+    if (numberInString !== undefined) {
+      this.setState({ speed: Number(numberInString) !== 0 ? numberInString : '' })
+    }
   }
 
   private buildTypeSelect() {
@@ -98,41 +112,28 @@ export class CreateWeapon extends React.Component<ICreateWeaponProps, ICreateWea
     this.setState({ type: event.target.value })
   }
 
-  private buildBulletSelect() {
-    let options: any[] = []
-    options.push(
-      <option value="0" key={0}>
-        无
-      </option>
-    )
-    const allBullets = this.props.manager.getGameObjectStore().getAllBullets()
-    allBullets.forEach((bullet, index) => {
-      options.push(
-        <option value={bullet.id} key={index + 1}>
-          {bullet.name}
-        </option>
-      )
-    })
+  private validateSpeed(): 'success' | 'warning' | 'error' | undefined {
+    return this.validateNotLessThanZero(this.state.speed)
+  }
 
-    return (
-      <FormGroup controlId="bullet">
-        <Col componentClass={ControlLabel} sm={smSize}>
-          子弹
-        </Col>
-        <Col sm={12 - smSize}>
-          <FormControl componentClass="select" defaultValue="0" onChange={this.onBulletChanged}>
-            {options}
-          </FormControl>
-        </Col>
-      </FormGroup>
-    )
+  private validateNotLessThanZero(value: string): 'success' | 'warning' | 'error' | undefined {
+    if (value.length !== 0) {
+      const number = Number(value)
+      if (number < 0) {
+        return 'error'
+      }
+
+      return 'success'
+    }
+
+    return undefined
   }
 
   public render() {
     return (
       <Modal show={true} onHide={this.props.onDismissed} backdrop="static">
         <Modal.Header>
-          <Modal.Title>{this.props.weaponToEdit === 0 ? '新建武器' : '编辑武器'}</Modal.Title>
+          <Modal.Title>{this.props.title}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form horizontal>
@@ -141,7 +142,7 @@ export class CreateWeapon extends React.Component<ICreateWeaponProps, ICreateWea
                 ID
               </Col>
               <Col sm={12 - smSize}>
-                <FormControl type="text" value={this.state.id} disabled={this.props.weaponToEdit === 0} />
+                <FormControl type="text" value={this.state.id} disabled={this.props.backgroundToEdit === 0} />
               </Col>
             </FormGroup>
             <FormGroup controlId="name">
@@ -152,19 +153,29 @@ export class CreateWeapon extends React.Component<ICreateWeaponProps, ICreateWea
                 <FormControl type="text" value={this.state.name} onChange={this.onNameChanged} />
               </Col>
             </FormGroup>
-            {this.buildTypeSelect()}
-            {this.buildBulletSelect()}
-            <FormGroup controlId="speed">
+            <FormGroup controlId={'file'}>
               <Col componentClass={ControlLabel} sm={smSize}>
-                扳机间隔
+                图片1
               </Col>
               <Col sm={12 - smSize}>
-                <FormControl
-                  type="text"
-                  placeholder="毫秒"
-                  value={this.state.triggerInterval}
-                  onChange={this.onTriggerIntervalChanged}
-                />
+                <FormControl type="file" value={this.state.file1} onChange={this.onFile1Changed} />
+              </Col>
+            </FormGroup>
+            <FormGroup controlId={'file'}>
+              <Col componentClass={ControlLabel} sm={smSize}>
+                图片2
+              </Col>
+              <Col sm={12 - smSize}>
+                <FormControl type="file" value={this.state.file2} onChange={this.onFile2Changed} />
+              </Col>
+            </FormGroup>
+            {this.buildTypeSelect()}
+            <FormGroup controlId="speed" validationState={this.validateSpeed()}>
+              <Col componentClass={ControlLabel} sm={smSize}>
+                速度
+              </Col>
+              <Col sm={12 - smSize}>
+                <FormControl type="text" value={this.state.speed} onChange={this.onSpeedChanged} />
               </Col>
             </FormGroup>
           </Form>

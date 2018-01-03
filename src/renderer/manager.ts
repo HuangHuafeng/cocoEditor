@@ -18,11 +18,12 @@ export enum PopupType {
   About = 1,
   CreateBullet,
   CreateWeapon,
-  CreateEnemyForce,
-  CreateObjectGenerator,
+  CreateEnemyObject,
   CreateFriendPlane,
-  CreatePlayerPlane,
-  CreateObject,
+  CreateBackground,
+  CreateObjectGenerator,
+  AddSceneObject,
+  AddPlayerPlane,
 }
 
 export class Manager {
@@ -72,7 +73,7 @@ export class Manager {
       case PopupType.CreateWeapon:
         return this.closeTopDialog(dialog)
 
-      case PopupType.CreateEnemyForce:
+      case PopupType.CreateEnemyObject:
         return this.closeTopDialog(dialog)
 
       case PopupType.CreateObjectGenerator:
@@ -81,10 +82,13 @@ export class Manager {
       case PopupType.CreateFriendPlane:
         return this.closeTopDialog(dialog)
 
-      case PopupType.CreatePlayerPlane:
+      case PopupType.AddPlayerPlane:
         return this.closeTopDialog(dialog)
 
-      case PopupType.CreateObject:
+      case PopupType.AddSceneObject:
+        return this.closeTopDialog(dialog)
+
+      case PopupType.CreateBackground:
         return this.closeTopDialog(dialog)
 
       default:
@@ -145,29 +149,20 @@ export class Manager {
     this.gameObjectStore.createObjectGenerator(parameter)
   }
 
-  public createFriendPlane(
-    id: number,
-    name: string,
-    file: string,
-    health: number,
-    speed: number,
-    damage: number,
-    weapon: number,
-    type: string
-  ) {
-    this.gameObjectStore.createFriendPlane(id, name, file, health, speed, damage, weapon, type)
+  public addPlayerPlane(parameter: any) {
+    this.gameObjectStore.addPlayerPlane(parameter)
   }
 
-  public createPlayerPlane(parameter: any) {
-    this.gameObjectStore.createObject(parameter)
+  public addSceneObject(parameter: any) {
+    this.gameObjectStore.addSceneObject(parameter)
   }
 
   public createObject(parameter: any) {
     this.gameObjectStore.createObject(parameter)
   }
 
-  public createForce(parameter: any) {
-    this.gameObjectStore.createForce(parameter)
+  public createBackground(parameter: any) {
+    this.gameObjectStore.createBackground(parameter)
   }
 
   public getGameObjectStore() {

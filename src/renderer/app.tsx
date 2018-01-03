@@ -10,9 +10,10 @@ import { ObjectDetails } from './ObjectDetails'
 import { GamePreview } from './GamePreview'
 import { CreateBullet } from './CreateBullet'
 import { CreateWeapon } from './CreateWeapon'
-import { CreateForce } from './CreateForce'
-import { CreateObjectGenerator } from './CreateObjectGenerator'
 import { CreateObject } from './CreateObject'
+import { CreateObjectGenerator } from './CreateObjectGenerator'
+import { AddSceneObject } from './AddSceneObject'
+import { CreateBackground } from './CreateBackground'
 
 const notImplemented = (name: string) => {
   const options = {
@@ -68,26 +69,29 @@ export class App extends React.Component<IAppProps, IAppState> {
    */
   private onMenuEvent(event: MenuEvent) {
     switch (event) {
-      case 'new-bullet-class':
+      case 'new-bullet':
         return this.props.manager.showPopup(PopupType.CreateBullet)
 
-      case 'new-weapon-class':
+      case 'new-weapon':
         return this.props.manager.showPopup(PopupType.CreateWeapon)
 
-      case 'new-enemy-force-class':
-        return this.props.manager.showPopup(PopupType.CreateEnemyForce)
+      case 'new-enemy-force':
+        return this.props.manager.showPopup(PopupType.CreateEnemyObject)
 
-      case 'new-object-generator-class':
+      case 'new-object-generator':
         return this.props.manager.showPopup(PopupType.CreateObjectGenerator)
 
-      case 'new-friend-plane-class':
+      case 'new-friend-plane':
         return this.props.manager.showPopup(PopupType.CreateFriendPlane)
 
-      case 'new-player-plane':
-        return this.props.manager.showPopup(PopupType.CreatePlayerPlane)
+      case 'add-player-plane':
+        return this.props.manager.showPopup(PopupType.AddPlayerPlane)
 
-      case 'new-object':
-        return this.props.manager.showPopup(PopupType.CreateObject)
+      case 'add-scene-object':
+        return this.props.manager.showPopup(PopupType.AddSceneObject)
+
+      case 'new-background':
+        return this.props.manager.showPopup(PopupType.CreateBackground)
 
       case 'file-save':
         return this.props.manager.save()
@@ -109,8 +113,8 @@ export class App extends React.Component<IAppProps, IAppState> {
       case PopupType.CreateWeapon:
         return this.renderCreateWeaponDialog()
 
-      case PopupType.CreateEnemyForce:
-        return this.renderCreateEnemyForceDialog()
+      case PopupType.CreateEnemyObject:
+        return this.renderCreateEnemyObjectDialog()
 
       case PopupType.CreateObjectGenerator:
         return this.renderCreateObjectGeneratorDialog()
@@ -118,11 +122,14 @@ export class App extends React.Component<IAppProps, IAppState> {
       case PopupType.CreateFriendPlane:
         return this.renderCreateFriendPlaneDialog()
 
-      case PopupType.CreatePlayerPlane:
-        return this.renderCreatePlayerPlaneDialog()
+      case PopupType.AddPlayerPlane:
+        return this.renderAddPlayerPlaneDialog()
 
-      case PopupType.CreateObject:
-        return this.renderCreateEnemyObjectDialog()
+      case PopupType.AddSceneObject:
+        return this.renderAddSceneObjectDialog()
+
+      case PopupType.CreateBackground:
+        return this.renderCreateBackgroundDialog()
 
       default:
         assert.ok(false, `Unknown dialog: ${name}`)
@@ -141,6 +148,21 @@ export class App extends React.Component<IAppProps, IAppState> {
         bulletToEdit={0}
         title="新建子弹"
         typeList={this.props.manager.getGameObjectStore().getBulletTypes()}
+      />
+    )
+  }
+
+  private renderCreateBackgroundDialog() {
+    return (
+      <CreateBackground
+        key="create-bullet"
+        onDismissed={() => {
+          this.onPopupDismissed(PopupType.CreateBackground)
+        }}
+        manager={this.props.manager}
+        backgroundToEdit={0}
+        title="新建背景"
+        typeList={this.props.manager.getGameObjectStore().getBackgroundTypes()}
       />
     )
   }
@@ -175,19 +197,19 @@ export class App extends React.Component<IAppProps, IAppState> {
     )
   }
 
-  private renderCreateEnemyForceDialog() {
+  private renderCreateEnemyObjectDialog() {
     return (
-      <CreateForce
+      <CreateObject
         key="create-enemy-force"
         onDismissed={() => {
-          this.onPopupDismissed(PopupType.CreateEnemyForce)
+          this.onPopupDismissed(PopupType.CreateEnemyObject)
         }}
         manager={this.props.manager}
         forceToEdit={0}
-        title="新建敌人类型"
-        typeList={this.props.manager.getGameObjectStore().getOtherForceTypes()}
+        title="新建敌人"
+        typeList={this.props.manager.getGameObjectStore().getOtherObjectTypes()}
         onOkCallback={(parameter): void => {
-          this.props.manager.createForce(parameter)
+          this.props.manager.createObject(parameter)
         }}
       />
     )
@@ -195,17 +217,17 @@ export class App extends React.Component<IAppProps, IAppState> {
 
   private renderCreateFriendPlaneDialog() {
     return (
-      <CreateForce
+      <CreateObject
         key="create-friend-plane"
         onDismissed={() => {
           this.onPopupDismissed(PopupType.CreateFriendPlane)
         }}
         manager={this.props.manager}
         forceToEdit={0}
-        title="新建盟友类型"
+        title="新建盟友"
         typeList={this.props.manager.getGameObjectStore().getPlayerPlaneTypes()}
         onOkCallback={(parameter): void => {
-          this.props.manager.createForce(parameter)
+          this.props.manager.createObject(parameter)
         }}
       />
     )
@@ -226,46 +248,50 @@ export class App extends React.Component<IAppProps, IAppState> {
   }
   */
 
-  private renderCreatePlayerPlaneDialog() {
+  private renderAddPlayerPlaneDialog() {
     return (
-      <CreateObject
+      <AddSceneObject
         key="create-player-plane"
         onDismissed={() => {
-          this.onPopupDismissed(PopupType.CreatePlayerPlane)
+          this.onPopupDismissed(PopupType.AddPlayerPlane)
         }}
         manager={this.props.manager}
         fromClassList={this.props.manager.getGameObjectStore().getAllFriendPlanes()}
-        title="新建玩家主机"
+        title="添加玩家主机"
         objectToEdit={0}
         onOkCallback={parameter => {
-          this.props.manager.createPlayerPlane(parameter)
+          this.props.manager.addPlayerPlane(parameter)
         }}
       />
     )
   }
 
-  private renderCreateEnemyObjectDialog() {
+  private renderAddSceneObjectDialog() {
     let fromClassList: any[] = []
     this.props.manager
       .getGameObjectStore()
+      .getAllBackgrounds()
+      .forEach(v => fromClassList.push(v)) // backgrounds
+    this.props.manager
+      .getGameObjectStore()
       .getAllClonableObjects()
-      .forEach(v => fromClassList.push(v))
+      .forEach(v => fromClassList.push(v)) // other clonable objects
     this.props.manager
       .getGameObjectStore()
       .getAllGenerators()
-      .forEach(v => fromClassList.push(v))
+      .forEach(v => fromClassList.push(v)) // generators
     return (
-      <CreateObject
-        key="create-enemy-object"
+      <AddSceneObject
+        key="add-scene-object"
         onDismissed={() => {
-          this.onPopupDismissed(PopupType.CreateObject)
+          this.onPopupDismissed(PopupType.AddSceneObject)
         }}
         manager={this.props.manager}
         fromClassList={fromClassList}
-        title="新建对象"
+        title="添加对象"
         objectToEdit={0}
         onOkCallback={parameter => {
-          this.props.manager.createObject(parameter)
+          this.props.manager.addSceneObject(parameter)
         }}
       />
     )

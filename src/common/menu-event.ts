@@ -11,13 +11,14 @@ export type MenuEvent =
   | 'remove-all-players'
   | 'checkForUpdate'
   | 'quitAndInstall'
-  | 'new-bullet-class'
-  | 'new-weapon-class'
-  | 'new-enemy-force-class'
-  | 'new-friend-plane-class'
-  | 'new-player-plane'
-  | 'new-object'
-  | 'new-object-generator-class'
+  | 'new-bullet'
+  | 'new-weapon'
+  | 'new-enemy-force'
+  | 'new-friend-plane'
+  | 'add-player-plane'
+  | 'add-scene-object'
+  | 'new-object-generator'
+  | 'new-background'
 
 type ClickHandler = (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event) => void
 

@@ -67,7 +67,7 @@ export class CreateObjectGenerator extends React.Component<ICreateObjectGenerato
   private buildTypeSelect() {
     let options: any[] = []
     options.push(
-      <option value={0} key={0}>
+      <option value="0" key={0}>
         请选择
       </option>
     )
@@ -86,7 +86,7 @@ export class CreateObjectGenerator extends React.Component<ICreateObjectGenerato
           类型
         </Col>
         <Col sm={12 - smSize}>
-          <FormControl componentClass="select" placeholder="select" defaultValue="0" onChange={this.onTypeChanged}>
+          <FormControl componentClass="select" defaultValue="0" onChange={this.onTypeChanged}>
             {options}
           </FormControl>
         </Col>
@@ -101,8 +101,8 @@ export class CreateObjectGenerator extends React.Component<ICreateObjectGenerato
   private buildObjectSelect() {
     let options: any[] = []
     options.push(
-      <option value={0} key={0}>
-        请选择
+      <option value="0" key={0}>
+        无
       </option>
     )
     const allClonableObjects = this.props.manager.getGameObjectStore().getAllClonableObjects()
@@ -120,7 +120,7 @@ export class CreateObjectGenerator extends React.Component<ICreateObjectGenerato
           生产对象
         </Col>
         <Col sm={12 - smSize}>
-          <FormControl componentClass="select" placeholder="select" defaultValue="0" onChange={this.onClassIdChanged}>
+          <FormControl componentClass="select" defaultValue="0" onChange={this.onClassIdChanged}>
             {options}
           </FormControl>
         </Col>

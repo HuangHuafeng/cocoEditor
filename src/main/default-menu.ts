@@ -31,40 +31,44 @@ let template: Array<Electron.MenuItemConstructorOptions> = [
     role: 'editMenu',
   },
   {
-    label: '类型',
+    label: '对象',
     submenu: [
       {
-        label: '新建子弹类型',
-        click: emit('new-bullet-class'),
+        label: '新建子弹',
+        click: emit('new-bullet'),
       },
       {
-        label: '新建武器类型',
-        click: emit('new-weapon-class'),
+        label: '新建武器',
+        click: emit('new-weapon'),
       },
       {
-        label: '新建敌人类型',
-        click: emit('new-enemy-force-class'),
+        label: '新建敌人',
+        click: emit('new-enemy-force'),
       },
       {
-        label: '新建对象生产者类型',
-        click: emit('new-object-generator-class'),
+        label: '新建盟友',
+        click: emit('new-friend-plane'),
       },
       {
-        label: '新建盟友类型',
-        click: emit('new-friend-plane-class'),
+        label: '新建背景',
+        click: emit('new-background'),
+      },
+      {
+        label: '新建对象生产者',
+        click: emit('new-object-generator'),
       },
     ],
   },
   {
-    label: '对象',
+    label: '场景',
     submenu: [
       {
-        label: '新建对象',
-        click: emit('new-object'),
+        label: '添加对象',
+        click: emit('add-scene-object'),
       },
       {
-        label: '新建玩家主机',
-        click: emit('new-player-plane'),
+        label: '添加玩家主机',
+        click: emit('add-player-plane'),
       },
     ],
   },

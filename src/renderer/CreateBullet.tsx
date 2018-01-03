@@ -83,7 +83,7 @@ export class CreateBullet extends React.Component<ICreateBulletProps, ICreateBul
   private buildTypeSelect() {
     let options: any[] = []
     options.push(
-      <option value={0} key={0}>
+      <option value="0" key={0}>
         请选择
       </option>
     )
@@ -102,7 +102,7 @@ export class CreateBullet extends React.Component<ICreateBulletProps, ICreateBul
           类型
         </Col>
         <Col sm={12 - smSize}>
-          <FormControl componentClass="select" placeholder="select" defaultValue="0" onChange={this.onTypeChanged}>
+          <FormControl componentClass="select" defaultValue="0" onChange={this.onTypeChanged}>
             {options}
           </FormControl>
         </Col>
